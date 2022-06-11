@@ -3,5 +3,12 @@ export const MainModuleConstant = {
 };
 
 export const MainModuleCommand = {
-  close: '.close',
+  close: '.exit',
+  up: 'up',
+};
+
+export const MainModuleError = {
+  invalidOperation: 'Invalid operation!',
+  argsWithExit: 'Do not input values to exit command!',
+  argsWithUp: 'Do not input values to up command!',
 };

@@ -1,9 +1,14 @@
 import { stdin, stdout, argv, chdir, cwd, exit } from 'process';
+import { join } from 'path';
 import { homedir } from 'os';
 import { createInterface } from 'readline';
 import { greetingModule } from './greeting/hello.js';
 import { onExitModule } from './greeting/bye.js';
-import { MainModuleConstant, MainModuleCommand } from './constants.js';
+import {
+  MainModuleConstant,
+  MainModuleCommand,
+  MainModuleError,
+} from './constants.js';
 
 const rl = createInterface({
   input: stdin,
@@ -17,26 +22,47 @@ const writeToConsole = (mess) => {
 };
 
 const lastStep = () => {
-  rl.write(`\n${MainModuleConstant.lastStepText} ${cwd()}\n`);
+  console.log(`${MainModuleConstant.lastStepText} ${cwd()}`);
   rl.prompt();
 };
 
 const appStart = () => {
   chdir(homedir());
-  userName = greetingModule(argv, writeToConsole);
+  userName = greetingModule(argv);
   lastStep();
 };
 
 const appEnd = () => {
-  onExitModule(userName, writeToConsole);
-  exit(1);
+  onExitModule(userName);
+  exit();
 };
 
 rl.on('close', appEnd);
 
 rl.on('line', (input) => {
-  if (input.startsWith(MainModuleCommand.close)) {
-    appEnd();
+  const [command, source, dist] = input.split(' ');
+
+  try {
+    switch (command) {
+      case MainModuleCommand.close: {
+        if (source) throw new Error(MainModuleError.argsWithExit);
+        appEnd();
+      }
+
+      case MainModuleCommand.up: {
+        if (source) throw new Error(MainModuleError.argsWithUp);
+        chdir(join(cwd(), '../'));
+        break;
+      }
+
+      default: {
+        throw new Error(MainModuleError.invalidOperation);
+      }
+    }
+  } catch (err) {
+    console.log(err.message);
+  } finally {
+    lastStep();
   }
 });
 
