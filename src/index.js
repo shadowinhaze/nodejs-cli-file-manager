@@ -12,6 +12,7 @@ import {
 import { readdir } from 'fs/promises';
 import { getSystemInfo } from './system-info/index.js';
 import { calculateHash } from './hash/index.js';
+import { zipper } from './compress/index.js';
 
 const rl = createInterface({
   input: stdin,
@@ -40,7 +41,7 @@ const appEnd = () => {
 rl.on('close', appEnd);
 
 rl.on('line', (input) => {
-  const [command, firstArg, thirdArg] = input.split(' ');
+  const [command, firstArg, secArg] = input.split(' ');
 
   try {
     switch (command) {
@@ -68,7 +69,7 @@ rl.on('line', (input) => {
       }
 
       case MainModuleCommand.cd: {
-        if (thirdArg) throw new Error(MainModuleError.cdWithThirdArg);
+        if (secArg) throw new Error(MainModuleError.cdWithSecArg);
 
         chdir(isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg));
 
@@ -92,6 +93,42 @@ rl.on('line', (input) => {
         calculateHash(
           isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg),
           lastStep,
+        );
+
+        break;
+      }
+
+      case MainModuleCommand.zip: {
+        if (!firstArg) throw new Error(MainModuleError.invalidInput);
+
+        const dest = secArg ? secArg : cwd();
+
+        const zipName = firstArg.split(sep).slice(-1)[0];
+
+        console.log(zipName);
+
+        zipper(
+          MainModuleCommand.zip,
+          isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg),
+          isAbsolute(dest)
+            ? join(dest, zipName + '.br')
+            : join(cwd(), dest, zipName + '.br'),
+        );
+
+        break;
+      }
+
+      case MainModuleCommand.unzip: {
+        if (!firstArg) throw new Error(MainModuleError.invalidInput);
+
+        const dest = secArg ? secArg : cwd();
+
+        const fileName = firstArg.split(sep).slice(-1)[0].replaceAll('.br', '');
+
+        zipper(
+          MainModuleCommand.unzip,
+          isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg),
+          isAbsolute(dest) ? join(dest, fileName) : join(cwd(), dest, fileName),
         );
 
         break;

@@ -9,6 +9,8 @@ export const MainModuleCommand = {
   cd: 'cd',
   os: 'os',
   hash: 'hash',
+  zip: 'compress',
+  unzip: 'decompress',
 };
 
 export const MainModuleError = {
@@ -17,5 +19,5 @@ export const MainModuleError = {
   argsWithExit: 'Do not input values to exit command!',
   argsWithUp: 'Do not input values to up command!',
   argsWithLs: 'Do not input values to ls command!',
-  cdWithThirdArg: 'You must input only one path for cd command!',
+  cdWithSecArg: 'You must input only one path for cd command!',
 };
