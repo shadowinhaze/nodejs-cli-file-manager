@@ -11,6 +11,12 @@ export const MainModuleCommand = {
   hash: 'hash',
   zip: 'compress',
   unzip: 'decompress',
+  read: 'cat',
+  add: 'add',
+  rename: 'rn',
+  copy: 'cp',
+  move: 'mv',
+  del: 'rm',
 };
 
 export const MainModuleError = {

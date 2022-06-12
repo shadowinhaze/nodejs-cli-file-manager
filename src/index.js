@@ -13,6 +13,12 @@ import { readdir } from 'fs/promises';
 import { getSystemInfo } from './system-info/index.js';
 import { calculateHash } from './hash/index.js';
 import { zipper } from './compress/index.js';
+import { readFromFile } from './basic/read.js';
+import { createFile } from './basic/create.js';
+import { renameFile } from './basic/rename.js';
+import { copyFile } from './basic/copy.js';
+import { moveFile } from './basic/move.js';
+import { deleteFile } from './basic/delete.js';
 
 const rl = createInterface({
   input: stdin,
@@ -131,6 +137,53 @@ rl.on('line', (input) => {
           isAbsolute(dest) ? join(dest, fileName) : join(cwd(), dest, fileName),
         );
 
+        break;
+      }
+
+      case MainModuleCommand.read: {
+        if (!firstArg) throw new Error(MainModuleError.invalidInput);
+        readFromFile(isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg));
+        break;
+      }
+
+      case MainModuleCommand.add: {
+        if (!firstArg) throw new Error(MainModuleError.invalidInput);
+        createFile(isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg));
+        break;
+      }
+
+      case MainModuleCommand.rename: {
+        if (!firstArg || !secArg) throw new Error(MainModuleError.invalidInput);
+
+        renameFile(
+          isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg),
+          secArg,
+        );
+
+        break;
+      }
+
+      case MainModuleCommand.copy: {
+        if (!firstArg || !secArg) throw new Error(MainModuleError.invalidInput);
+        copyFile(
+          isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg),
+          isAbsolute(secArg) ? secArg : join(cwd(), secArg),
+        );
+        break;
+      }
+
+      case MainModuleCommand.move: {
+        if (!firstArg || !secArg) throw new Error(MainModuleError.invalidInput);
+        moveFile(
+          isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg),
+          isAbsolute(secArg) ? secArg : join(cwd(), secArg),
+        );
+        break;
+      }
+
+      case MainModuleCommand.del: {
+        if (!firstArg || secArg) throw new Error(MainModuleError.invalidInput);
+        deleteFile(isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg));
         break;
       }
 
