@@ -1,5 +1,5 @@
 import { stdin, stdout, argv, chdir, cwd, exit } from 'process';
-import { join } from 'path';
+import { join, sep, isAbsolute } from 'path';
 import { homedir } from 'os';
 import { createInterface } from 'readline';
 import { greetingModule } from './greeting/hello.js';
@@ -9,6 +9,7 @@ import {
   MainModuleCommand,
   MainModuleError,
 } from './constants.js';
+import { readdir } from 'fs/promises';
 
 const rl = createInterface({
   input: stdin,
@@ -16,10 +17,6 @@ const rl = createInterface({
 });
 
 let userName = '';
-
-const writeToConsole = (mess) => {
-  rl.write(mess);
-};
 
 const lastStep = () => {
   console.log(`${MainModuleConstant.lastStepText} ${cwd()}`);
@@ -40,18 +37,38 @@ const appEnd = () => {
 rl.on('close', appEnd);
 
 rl.on('line', (input) => {
-  const [command, source, dist] = input.split(' ');
+  const [command, firstArg, thirdArg] = input.split(' ');
 
   try {
     switch (command) {
       case MainModuleCommand.close: {
-        if (source) throw new Error(MainModuleError.argsWithExit);
+        if (firstArg) throw new Error(MainModuleError.argsWithExit);
+
         appEnd();
       }
 
       case MainModuleCommand.up: {
-        if (source) throw new Error(MainModuleError.argsWithUp);
+        if (firstArg) throw new Error(MainModuleError.argsWithUp);
         chdir(join(cwd(), '../'));
+
+        break;
+      }
+
+      case MainModuleCommand.ls: {
+        if (firstArg) throw new Error(MainModuleError.argsWithLs);
+
+        readdir(join(cwd())).then((data) => {
+          console.log(data);
+        });
+
+        break;
+      }
+
+      case MainModuleCommand.cd: {
+        if (thirdArg) throw new Error(MainModuleError.cdWithThirdArg);
+
+        chdir(isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg));
+
         break;
       }
 
