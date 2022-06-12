@@ -49,6 +49,11 @@ rl.on('close', appEnd);
 rl.on('line', (input) => {
   const [command, firstArg, secArg] = input.split(' ');
 
+  const checkIfAbsolute = (path) =>
+    isAbsolute(path) ? path : join(cwd(), path);
+
+  let notToPromise = true;
+
   try {
     switch (command) {
       case MainModuleCommand.close: {
@@ -59,16 +64,20 @@ rl.on('line', (input) => {
 
       case MainModuleCommand.up: {
         if (firstArg) throw new Error(MainModuleError.argsWithUp);
+
         chdir(join(cwd(), '../'));
 
         break;
       }
 
       case MainModuleCommand.ls: {
+        notToPromise = false;
+
         if (firstArg) throw new Error(MainModuleError.argsWithLs);
 
         readdir(join(cwd())).then((data) => {
           console.log(data);
+          lastStep();
         });
 
         break;
@@ -77,7 +86,7 @@ rl.on('line', (input) => {
       case MainModuleCommand.cd: {
         if (secArg) throw new Error(MainModuleError.cdWithSecArg);
 
-        chdir(isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg));
+        chdir(checkIfAbsolute(firstArg));
 
         break;
       }
@@ -94,12 +103,11 @@ rl.on('line', (input) => {
       }
 
       case MainModuleCommand.hash: {
+        notToPromise = false;
+
         if (!firstArg) throw new Error(MainModuleError.invalidInput);
 
-        calculateHash(
-          isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg),
-          lastStep,
-        );
+        calculateHash(checkIfAbsolute(firstArg), lastStep);
 
         break;
       }
@@ -115,7 +123,7 @@ rl.on('line', (input) => {
 
         zipper(
           MainModuleCommand.zip,
-          isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg),
+          checkIfAbsolute(firstArg),
           isAbsolute(dest)
             ? join(dest, zipName + '.br')
             : join(cwd(), dest, zipName + '.br'),
@@ -133,7 +141,7 @@ rl.on('line', (input) => {
 
         zipper(
           MainModuleCommand.unzip,
-          isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg),
+          checkIfAbsolute(firstArg),
           isAbsolute(dest) ? join(dest, fileName) : join(cwd(), dest, fileName),
         );
 
@@ -141,49 +149,51 @@ rl.on('line', (input) => {
       }
 
       case MainModuleCommand.read: {
+        notToPromise = false;
+
         if (!firstArg) throw new Error(MainModuleError.invalidInput);
-        readFromFile(isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg));
+        readFromFile(checkIfAbsolute(firstArg), lastStep);
+
         break;
       }
 
       case MainModuleCommand.add: {
         if (!firstArg) throw new Error(MainModuleError.invalidInput);
-        createFile(isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg));
+
+        createFile(checkIfAbsolute(firstArg));
+
         break;
       }
 
       case MainModuleCommand.rename: {
         if (!firstArg || !secArg) throw new Error(MainModuleError.invalidInput);
 
-        renameFile(
-          isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg),
-          secArg,
-        );
+        renameFile(checkIfAbsolute(firstArg), secArg);
 
         break;
       }
 
       case MainModuleCommand.copy: {
         if (!firstArg || !secArg) throw new Error(MainModuleError.invalidInput);
-        copyFile(
-          isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg),
-          isAbsolute(secArg) ? secArg : join(cwd(), secArg),
-        );
+
+        copyFile(checkIfAbsolute(firstArg), checkIfAbsolute(secArg));
+
         break;
       }
 
       case MainModuleCommand.move: {
         if (!firstArg || !secArg) throw new Error(MainModuleError.invalidInput);
-        moveFile(
-          isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg),
-          isAbsolute(secArg) ? secArg : join(cwd(), secArg),
-        );
+
+        moveFile(checkIfAbsolute(firstArg), checkIfAbsolute(secArg));
+
         break;
       }
 
       case MainModuleCommand.del: {
         if (!firstArg || secArg) throw new Error(MainModuleError.invalidInput);
-        deleteFile(isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg));
+
+        deleteFile(checkIfAbsolute(firstArg));
+
         break;
       }
 
@@ -194,7 +204,8 @@ rl.on('line', (input) => {
   } catch (err) {
     console.log(err.message);
   } finally {
-    lastStep();
+    if (notToPromise) lastStep();
+    notToPromise = true;
   }
 });
 
