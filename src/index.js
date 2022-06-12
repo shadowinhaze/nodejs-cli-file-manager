@@ -11,6 +11,7 @@ import {
 } from './constants.js';
 import { readdir } from 'fs/promises';
 import { getSystemInfo } from './system-info/index.js';
+import { calculateHash } from './hash/index.js';
 
 const rl = createInterface({
   input: stdin,
@@ -81,6 +82,17 @@ rl.on('line', (input) => {
           throw new Error(MainModuleError.invalidInput);
 
         getSystemInfo(firstArg.slice(2));
+
+        break;
+      }
+
+      case MainModuleCommand.hash: {
+        if (!firstArg) throw new Error(MainModuleError.invalidInput);
+
+        calculateHash(
+          isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg),
+          lastStep,
+        );
 
         break;
       }

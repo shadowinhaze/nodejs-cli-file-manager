@@ -8,6 +8,7 @@ export const MainModuleCommand = {
   ls: 'ls',
   cd: 'cd',
   os: 'os',
+  hash: 'hash',
 };
 
 export const MainModuleError = {
