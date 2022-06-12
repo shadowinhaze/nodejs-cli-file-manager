@@ -27,7 +27,7 @@ const rl = createInterface({
 
 let userName = '';
 
-const lastStep = () => {
+export const lastStep = () => {
   console.log('**************************');
   console.log(`${MainModuleConstant.lastStepText} ${cwd()}`);
   rl.prompt();
@@ -127,6 +127,7 @@ rl.on('line', (input) => {
           isAbsolute(dest)
             ? join(dest, zipName + '.br')
             : join(cwd(), dest, zipName + '.br'),
+          lastStep,
         );
 
         break;
@@ -143,6 +144,7 @@ rl.on('line', (input) => {
           MainModuleCommand.unzip,
           checkIfAbsolute(firstArg),
           isAbsolute(dest) ? join(dest, fileName) : join(cwd(), dest, fileName),
+          lastStep,
         );
 
         break;
@@ -152,6 +154,7 @@ rl.on('line', (input) => {
         notToPromise = false;
 
         if (!firstArg) throw new Error(MainModuleError.invalidInput);
+
         readFromFile(checkIfAbsolute(firstArg), lastStep);
 
         break;

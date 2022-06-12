@@ -10,4 +10,6 @@ export const calculateHash = async (filePath, lastAction) => {
     console.log(hashSum.digest('hex'));
     lastAction();
   });
+
+  stream.on('error', (err) => errorResolver(err));
 };
