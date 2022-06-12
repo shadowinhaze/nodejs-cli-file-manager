@@ -1,7 +1,7 @@
 import { createReadStream, createWriteStream } from 'fs';
 import { errorResolver } from '../utils/error-resolver.js';
 
-export const zipper = async (mode, source, dist, lastAction) => {
+export const zipper = async (mode, source, dist) => {
   const sourceStream = createReadStream(source);
   const distStream = createWriteStream(dist);
 

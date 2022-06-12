@@ -73,7 +73,10 @@ rl.on('line', (input) => {
       case MainModuleCommand.ls: {
         notToPromise = false;
 
-        if (firstArg) throw new Error(MainModuleError.argsWithLs);
+        if (firstArg) {
+          notToPromise = true;
+          throw new Error(MainModuleError.argsWithLs);
+        }
 
         readdir(join(cwd())).then((data) => {
           console.log(data);
@@ -127,7 +130,6 @@ rl.on('line', (input) => {
           isAbsolute(dest)
             ? join(dest, zipName + '.br')
             : join(cwd(), dest, zipName + '.br'),
-          lastStep,
         );
 
         break;
@@ -144,7 +146,6 @@ rl.on('line', (input) => {
           MainModuleCommand.unzip,
           checkIfAbsolute(firstArg),
           isAbsolute(dest) ? join(dest, fileName) : join(cwd(), dest, fileName),
-          lastStep,
         );
 
         break;
@@ -208,6 +209,7 @@ rl.on('line', (input) => {
     console.log(err.message);
   } finally {
     if (notToPromise) lastStep();
+
     notToPromise = true;
   }
 });
