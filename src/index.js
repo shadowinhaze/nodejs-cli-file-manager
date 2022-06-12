@@ -10,6 +10,7 @@ import {
   MainModuleError,
 } from './constants.js';
 import { readdir } from 'fs/promises';
+import { getSystemInfo } from './system-info/index.js';
 
 const rl = createInterface({
   input: stdin,
@@ -19,6 +20,7 @@ const rl = createInterface({
 let userName = '';
 
 const lastStep = () => {
+  console.log('**************************');
   console.log(`${MainModuleConstant.lastStepText} ${cwd()}`);
   rl.prompt();
 };
@@ -68,6 +70,17 @@ rl.on('line', (input) => {
         if (thirdArg) throw new Error(MainModuleError.cdWithThirdArg);
 
         chdir(isAbsolute(firstArg) ? firstArg : join(cwd(), firstArg));
+
+        break;
+      }
+
+      case MainModuleCommand.os: {
+        if (!firstArg) throw new Error(MainModuleError.invalidInput);
+
+        if (!firstArg.startsWith('--'))
+          throw new Error(MainModuleError.invalidInput);
+
+        getSystemInfo(firstArg.slice(2));
 
         break;
       }
